@@ -4,7 +4,7 @@ import Home from './components/Home';
 import FindRoutes from './components/FindRoutes';
 import Contact from './components/Contact';
 import Fares from './components/Fares';
-import '../src/main';
+// import '../src/main';
 
 const App = () => {
   return (
