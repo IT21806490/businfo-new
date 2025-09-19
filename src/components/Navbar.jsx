@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Menu, X } from "lucide-react";
+import { Link } from "react-router-dom"; 
 import logoImage from "../images/logo.png"; 
 
 const Navbar = () => {
@@ -19,16 +20,20 @@ const Navbar = () => {
       <div className="max-w-6xl mx-auto flex items-center justify-between py-4 px-4 md:py-6">
         {/* Logo */}
         <div className="flex items-center space-x-3">
-          <img src={logoImage} alt="BUSINFO.CLICK Logo" className="w-10 h-10 md:w-12 md:h-12 object-contain" />
+          <img
+            src={logoImage}
+            alt="BUSINFO.CLICK Logo"
+            className="w-10 h-10 md:w-12 md:h-12 object-contain"
+          />
           <h1 className="text-2xl md:text-3xl font-extrabold">BUSINFO.CLICK</h1>
         </div>
 
         {/* Desktop Menu */}
         <nav className="hidden md:flex space-x-8 font-medium text-base md:text-lg">
-          <a href="/" className="hover:text-yellow-400 transition">Home</a>
-          <a href="/fares" className="hover:text-yellow-400 transition">Fares</a>
-          <a href="/routes" className="hover:text-yellow-400 transition">Routes</a>
-          <a href="/contact" className="hover:text-yellow-400 transition">Contact</a>
+          <Link to="/" className="hover:text-yellow-400 transition">Home</Link>
+          <Link to="/fares" className="hover:text-yellow-400 transition">Fares</Link>
+          <Link to="/routes" className="hover:text-yellow-400 transition">Routes</Link>
+          <Link to="/contact" className="hover:text-yellow-400 transition">Contact</Link>
         </nav>
 
         {/* Mobile Hamburger */}
@@ -50,10 +55,10 @@ const Navbar = () => {
           opacity: isOpen ? 1 : 0,
         }}
       >
-        <a href="/" className="block px-4 py-2 hover:text-yellow-400 transition-opacity duration-300">Home</a>
-        <a href="/fares" className="block px-4 py-2 hover:text-yellow-400 transition-opacity duration-300">Fares</a>
-        <a href="/routes" className="block px-4 py-2 hover:text-yellow-400 transition-opacity duration-300">Routes</a>
-        <a href="/contact" className="block px-4 py-2 hover:text-yellow-400 transition-opacity duration-300">Contact</a>
+        <Link to="/" className="block px-4 py-2 hover:text-yellow-400 transition-opacity duration-300">Home</Link>
+        <Link to="/fares" className="block px-4 py-2 hover:text-yellow-400 transition-opacity duration-300">Fares</Link>
+        <Link to="/routes" className="block px-4 py-2 hover:text-yellow-400 transition-opacity duration-300">Routes</Link>
+        <Link to="/contact" className="block px-4 py-2 hover:text-yellow-400 transition-opacity duration-300">Contact</Link>
       </div>
 
       {/* Tailwind Keyframe Animation */}
