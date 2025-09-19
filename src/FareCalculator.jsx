@@ -2,6 +2,7 @@ import React, { useEffect, useState, useRef } from "react";
 import allSectionsData from "./data/all_section.json";
 import fareStagesData from "./data/fare_stages.json";
 import allRoutesData from "./data/allroutes.json";
+import { Bus, MapPin, RefreshCw, Trash2 } from "lucide-react"; // bus & icons
 
 const FareCalculator = () => {
   const [origin, setOrigin] = useState("");
@@ -10,21 +11,18 @@ const FareCalculator = () => {
   const [loading, setLoading] = useState(false);
   const [allSections, setAllSections] = useState([]);
 
-  // Indexed maps for O(1) lookups
   const [sectionMap, setSectionMap] = useState({});
   const [fareStageMap, setFareStageMap] = useState({});
   const [routeMap, setRouteMap] = useState({});
 
-  // Suggestions visibility
   const [showOriginSuggestions, setShowOriginSuggestions] = useState(false);
-  const [showDestinationSuggestions, setShowDestinationSuggestions] = useState(false);
+  const [showDestinationSuggestions, setShowDestinationSuggestions] =
+    useState(false);
 
-  // Refs for click outside detection
   const originRef = useRef(null);
   const destinationRef = useRef(null);
 
   useEffect(() => {
-    // Build sectionMap: { route_no: { section_name: sectionObj } }
     const sMap = {};
     const uniqueSections = new Set();
     allSectionsData.forEach((sec) => {
@@ -33,13 +31,11 @@ const FareCalculator = () => {
       uniqueSections.add(sec.section_name);
     });
 
-    // Build fareStageMap: { fare_stage: {normal, semi, ac} }
     const fMap = {};
     fareStagesData.forEach((f) => {
       fMap[f.fare_stage] = f;
     });
 
-    // Build routeMap: { Route_No: { Origin, Destination } }
     const rMap = {};
     allRoutesData.forEach((r) => {
       rMap[r.Route_No] = r;
@@ -51,13 +47,15 @@ const FareCalculator = () => {
     setAllSections(Array.from(uniqueSections).sort());
   }, []);
 
-  // Close suggestions on outside click
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (originRef.current && !originRef.current.contains(event.target)) {
         setShowOriginSuggestions(false);
       }
-      if (destinationRef.current && !destinationRef.current.contains(event.target)) {
+      if (
+        destinationRef.current &&
+        !destinationRef.current.contains(event.target)
+      ) {
         setShowDestinationSuggestions(false);
       }
     };
@@ -65,7 +63,6 @@ const FareCalculator = () => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // Calculation logic with pre-indexed maps
   const calculateFare = () => {
     if (!origin || !destination) {
       alert("Please select both origin and destination");
@@ -79,21 +76,15 @@ const FareCalculator = () => {
     setLoading(true);
     setTimeout(() => {
       const results = [];
-
-      // Check all routes where both origin & destination exist
       Object.keys(sectionMap).forEach((routeNo) => {
         const originSec = sectionMap[routeNo][origin];
         const destSec = sectionMap[routeNo][destination];
-
         if (originSec && destSec) {
           const sectionDiff = Math.abs(
             destSec.section_id - originSec.section_id
           );
-
           const fareData = fareStageMap[sectionDiff];
           if (!fareData) return;
-
-          // Build fare result entry
           const routeInfo = routeMap[routeNo];
           results.push({
             route_no: routeNo,
@@ -106,16 +97,12 @@ const FareCalculator = () => {
           });
         }
       });
-
-      // Sort results by route_no ascending
       results.sort((a, b) => a.route_no.localeCompare(b.route_no));
-
       setFareResults(results);
       setLoading(false);
-    }, 300); // slight delay for UX
+    }, 1000); // add little delay for animated effect
   };
 
-  // Filter suggestions based on input
   const filteredOriginSections = allSections.filter((sec) =>
     sec.toLowerCase().includes(origin.toLowerCase())
   );
@@ -134,7 +121,6 @@ const FareCalculator = () => {
     setFareResults([]);
   };
 
-  // Handle suggestion click
   const selectOrigin = (val) => {
     setOrigin(val);
     setShowOriginSuggestions(false);
@@ -145,210 +131,213 @@ const FareCalculator = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-r from-blue-50 to-indigo-100 p-6 flex flex-col items-center">
-      <div className="w-full max-w-3xl bg-white rounded-xl shadow-lg p-8">
-        <h1 className="text-3xl font-extrabold text-indigo-700 mb-6 text-center">
-          Bus Fare Calculator
-        </h1>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-          {/* Origin Input with suggestions */}
-          <div className="relative" ref={originRef}>
-            <label
-              htmlFor="origin"
-              className="block text-sm font-medium text-gray-700 mb-1"
-            >
-              Origin
-            </label>
-            <input
-              id="origin"
-              type="text"
-              placeholder="Type origin..."
-              value={origin}
-              onChange={(e) => {
-                setOrigin(e.target.value);
-                setShowOriginSuggestions(true);
-              }}
-              onFocus={() => setShowOriginSuggestions(true)}
-              className="w-full border border-gray-300 rounded-md p-2 focus:ring-indigo-500 focus:border-indigo-500"
-              autoComplete="off"
-            />
-            {showOriginSuggestions && filteredOriginSections.length > 0 && (
-              <ul className="absolute z-10 w-full max-h-48 overflow-auto bg-white border border-gray-300 rounded-md mt-1 shadow-lg">
-                {filteredOriginSections.map((sec) => (
-                  <li
-                    key={sec}
-                    onClick={() => selectOrigin(sec)}
-                    className="cursor-pointer px-3 py-2 hover:bg-indigo-100"
-                  >
-                    {sec}
-                  </li>
-                ))}
-              </ul>
-            )}
+    <div className="min-h-screen bg-gray-50 flex flex-col">
+      {/* Header / Banner */}
+      <header className="bg-gradient-to-r from-blue-600 to-blue-800 text-white py-6 shadow-md">
+        <div className="max-w-6xl mx-auto flex items-center justify-between px-4">
+          <div className="flex items-center space-x-3">
+            <Bus size={36} className="text-yellow-300" />
+            <h1 className="text-2xl md:text-3xl font-extrabold">
+              BUSINFO.CLICK
+            </h1>
           </div>
+          <nav className="hidden md:flex space-x-6 text-sm font-medium">
+            <a href="#" className="hover:text-yellow-300">Home</a>
+            <a href="#" className="hover:text-yellow-300">Routes</a>
+            <a href="#" className="hover:text-yellow-300">Contact</a>
+          </nav>
+        </div>
+        <div className="text-center mt-6">
+          <p className="text-lg md:text-xl font-medium">
+             Just Click for the, fastest fares across in Sri Lanka
+          </p>
+        </div>
+      </header>
 
-          {/* Destination Input with suggestions */}
-          <div className="relative" ref={destinationRef}>
-            <label
-              htmlFor="destination"
-              className="block text-sm font-medium text-gray-700 mb-1"
-            >
-              Destination
-            </label>
-            <input
-              id="destination"
-              type="text"
-              placeholder="Type destination..."
-              value={destination}
-              onChange={(e) => {
-                setDestination(e.target.value);
-                setShowDestinationSuggestions(true);
-              }}
-              onFocus={() => setShowDestinationSuggestions(true)}
-              className="w-full border border-gray-300 rounded-md p-2 focus:ring-indigo-500 focus:border-indigo-500"
-              autoComplete="off"
-            />
-            {showDestinationSuggestions && filteredDestinationSections.length > 0 && (
-              <ul className="absolute z-10 w-full max-h-48 overflow-auto bg-white border border-gray-300 rounded-md mt-1 shadow-lg">
-                {filteredDestinationSections.map((sec) => (
-                  <li
-                    key={sec}
-                    onClick={() => selectDestination(sec)}
-                    className="cursor-pointer px-3 py-2 hover:bg-indigo-100"
-                  >
-                    {sec}
-                  </li>
-                ))}
-              </ul>
-            )}
+      {/* Highlights */}
+      <section className="bg-white py-8 shadow-sm">
+        <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-6 px-4 text-center">
+          <div className="p-4 rounded-lg bg-blue-50">
+            <p className="text-2xl font-bold text-blue-700">{allRoutesData.length}</p>
+            <p className="text-gray-600">Routes Available</p>
+          </div>
+          <div className="p-4 rounded-lg bg-green-50">
+            <p className="text-2xl font-bold text-green-700">{allSections.length}</p>
+            <p className="text-gray-600">Sections Covered</p>
+          </div>
+          <div className="p-4 rounded-lg bg-yellow-50">
+            <p className="text-2xl font-bold text-yellow-700">100k+</p>
+            <p className="text-gray-600">Passengers Served</p>
           </div>
         </div>
+      </section>
 
-        <div className="flex justify-between items-center mb-6 space-x-4">
-          <button
-            onClick={swapOriginDestination}
-            disabled={!origin || !destination}
-            className="flex items-center justify-center space-x-2 px-4 py-2 bg-indigo-100 text-indigo-700 rounded-md hover:bg-indigo-200 transition disabled:opacity-50"
-            title="Swap Origin and Destination"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-5 w-5"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              strokeWidth={2}
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M17 8l4 4m0 0l-4 4m4-4H3"
+      {/* Main Fare Calculator */}
+      <main className="flex-1 p-6 flex justify-center">
+        <div className="w-full max-w-4xl bg-white rounded-xl shadow-lg p-8">
+          <h2 className="text-2xl font-extrabold text-blue-700 mb-6 text-center">
+            Find Your Cost
+          </h2>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+            {/* Origin */}
+            <div className="relative" ref={originRef}>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Origin
+              </label>
+              <input
+                type="text"
+                placeholder="Enter origin..."
+                value={origin}
+                onChange={(e) => {
+                  setOrigin(e.target.value);
+                  setShowOriginSuggestions(true);
+                }}
+                onFocus={() => setShowOriginSuggestions(true)}
+                className="w-full border border-gray-300 rounded-md p-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                autoComplete="off"
               />
-            </svg>
-            <span>Swap</span>
-          </button>
+              {showOriginSuggestions && filteredOriginSections.length > 0 && (
+                <ul className="absolute z-10 w-full max-h-48 overflow-auto bg-white border border-gray-300 rounded-md mt-1 shadow-lg">
+                  {filteredOriginSections.map((sec) => (
+                    <li
+                      key={sec}
+                      onClick={() => selectOrigin(sec)}
+                      className="cursor-pointer px-3 py-2 hover:bg-blue-100"
+                    >
+                      {sec}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
 
-          <button
-            onClick={clearSelections}
-            className="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition"
-          >
-            Clear
-          </button>
+            {/* Destination */}
+            <div className="relative" ref={destinationRef}>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Destination
+              </label>
+              <input
+                type="text"
+                placeholder="Enter destination..."
+                value={destination}
+                onChange={(e) => {
+                  setDestination(e.target.value);
+                  setShowDestinationSuggestions(true);
+                }}
+                onFocus={() => setShowDestinationSuggestions(true)}
+                className="w-full border border-gray-300 rounded-md p-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                autoComplete="off"
+              />
+              {showDestinationSuggestions &&
+                filteredDestinationSections.length > 0 && (
+                  <ul className="absolute z-10 w-full max-h-48 overflow-auto bg-white border border-gray-300 rounded-md mt-1 shadow-lg">
+                    {filteredDestinationSections.map((sec) => (
+                      <li
+                        key={sec}
+                        onClick={() => selectDestination(sec)}
+                        className="cursor-pointer px-3 py-2 hover:bg-blue-100"
+                      >
+                        {sec}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+            </div>
+          </div>
 
-          <button
-            onClick={calculateFare}
-            disabled={loading || !origin || !destination || origin === destination}
-            className="px-6 py-2 bg-indigo-600 text-white rounded-md shadow hover:bg-indigo-700 transition disabled:opacity-50"
-          >
-            {loading ? (
-              <div className="flex items-center space-x-2 justify-center">
-                <svg
-                  className="animate-spin h-5 w-5 text-white"
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                >
-                  <circle
-                    className="opacity-25"
-                    cx="12"
-                    cy="12"
-                    r="10"
-                    stroke="currentColor"
-                    strokeWidth="4"
-                  ></circle>
-                  <path
-                    className="opacity-75"
-                    fill="currentColor"
-                    d="M4 12a8 8 0 018-8v8H4z"
-                  ></path>
-                </svg>
-                <span>Calculating...</span>
+          {/* Buttons */}
+          <div className="flex justify-between items-center mb-6 space-x-4">
+            <button
+              onClick={swapOriginDestination}
+              disabled={!origin || !destination}
+              className="flex items-center px-4 py-2 bg-blue-100 text-blue-700 rounded-md hover:bg-blue-200 transition disabled:opacity-50"
+            >
+              <RefreshCw size={16} className="mr-2" /> Swap
+            </button>
+
+            <button
+              onClick={clearSelections}
+              className="flex items-center px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition"
+            >
+              <Trash2 size={16} className="mr-2" /> Clear
+            </button>
+
+            <button
+              onClick={calculateFare}
+              disabled={loading || !origin || !destination || origin === destination}
+              className="px-6 py-2 bg-blue-600 text-white rounded-md shadow hover:bg-blue-700 transition disabled:opacity-50"
+            >
+              {loading ? "Calculating..." : "Calculate Fare"}
+            </button>
+          </div>
+
+          {/* Results */}
+          <div>
+            {loading && (
+              <div className="text-center py-6">
+                <Bus className="animate-bounce mx-auto text-blue-600" size={40} />
+                <p className="text-gray-600 mt-2">Finding best routes...</p>
               </div>
-            ) : (
-              "Calculate Fare"
             )}
-          </button>
-        </div>
 
-        {/* Results */}
-        <div>
-          {fareResults.length === 0 && !loading && (
-            <p className="text-center text-gray-500 text-lg mt-8">
-              {origin && destination
-                ? "No routes found between selected origin and destination."
-                : "Please select origin and destination to calculate fare."}
-            </p>
-          )}
-
-          {fareResults.length > 0 && (
-            <>
-              <p className="mb-4 text-indigo-700 font-semibold text-center">
-                Found {fareResults.length} route
-                {fareResults.length > 1 ? "s" : ""}
+            {!loading && fareResults.length === 0 && (
+              <p className="text-center text-gray-500 text-lg mt-8">
+                {origin && destination
+                  ? "No routes found between selected origin and destination."
+                  : "Please select origin and destination to calculate fare."}
               </p>
-              <div className="grid gap-4 md:grid-cols-2">
-                {fareResults.map((fare, idx) => (
-                  <div
-                    key={idx}
-                    className="border border-indigo-200 rounded-lg p-5 shadow-sm hover:shadow-md transition bg-white"
-                  >
-                    <div className="mb-2">
-                      <h2 className="text-lg font-bold text-indigo-800">
-                        {fare.route_name}
-                      </h2>
-                      <p className="text-sm text-gray-600">
-                        <span className="font-semibold">Route No:</span>{" "}
-                        {fare.route_no}
-                      </p>
-                    </div>
-                    <div className="grid grid-cols-3 gap-3 mt-3">
-                      <div className="rounded-md p-3 text-center bg-orange-100 text-orange-800">
-                        <p className="text-sm font-semibold">Normal</p>
-                        <p className="text-lg font-bold">Rs. {fare.normal}</p>
-                      </div>
-                      <div className="rounded-md p-3 text-center bg-blue-100 text-blue-800">
-                        <p className="text-sm font-semibold">Semi</p>
-                        <p className="text-lg font-bold">Rs. {fare.semi}</p>
-                      </div>
-                      <div className="rounded-md p-3 text-center bg-green-100 text-green-800">
-                        <p className="text-sm font-semibold">AC</p>
-                        <p className="text-lg font-bold">Rs. {fare.ac}</p>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </>
-          )}
-        </div>
-      </div>
+            )}
 
-      <footer className="mt-10 text-center text-gray-500 text-sm">
-        &copy; {new Date().getFullYear()} Bus Fare Calculator. All rights reserved.
+            {fareResults.length > 0 && (
+              <>
+                <p className="mb-4 text-blue-700 font-semibold text-center">
+                  Found {fareResults.length} route
+                  {fareResults.length > 1 ? "s" : ""}
+                </p>
+                <div className="grid gap-4 md:grid-cols-2">
+                  {fareResults.map((fare, idx) => (
+                    <div
+                      key={idx}
+                      className="border border-gray-200 rounded-lg p-5 shadow-sm hover:shadow-md transition bg-white"
+                    >
+                      <div className="mb-2">
+                        <h2 className="text-lg font-bold text-blue-800">
+                          {fare.route_name}
+                        </h2>
+                        <p className="text-sm text-gray-600">
+                          <span className="font-semibold">Route No:</span>{" "}
+                          {fare.route_no}
+                        </p>
+                      </div>
+                      <div className="grid grid-cols-3 gap-3 mt-3">
+                        <div className="rounded-md p-3 text-center bg-blue-50 text-blue-700">
+                          <p className="text-sm font-semibold">Normal</p>
+                          <p className="text-lg font-bold">Rs. {fare.normal}</p>
+                        </div>
+                        <div className="rounded-md p-3 text-center bg-green-50 text-green-700">
+                          <p className="text-sm font-semibold">Semi</p>
+                          <p className="text-lg font-bold">Rs. {fare.semi}</p>
+                        </div>
+                        <div className="rounded-md p-3 text-center bg-yellow-50 text-yellow-700">
+                          <p className="text-sm font-semibold">AC</p>
+                          <p className="text-lg font-bold">Rs. {fare.ac}</p>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      </main>
+
+      {/* Footer */}
+      <footer className="bg-blue-800 text-white py-6 text-center text-sm">
+        &copy; {new Date().getFullYear()} Businfo.click — All rights reserved.
       </footer>
     </div>
-
   );
 };
 
