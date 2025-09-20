@@ -25,7 +25,7 @@ const Navbar = () => {
             alt="BUSINFO.CLICK Logo"
             className="w-10 h-10 md:w-12 md:h-12 object-contain"
           />
-          <h1 className="text-2xl md:text-3xl font-extrabold">BUSINFO.CLICK</h1>
+          <h1 className="text-2xl md:text-3xl font-extrabold">Businfo.Click</h1>
         </div>
 
         {/* Desktop Menu */}
@@ -78,3 +78,4 @@ const Navbar = () => {
 };
 
 export default Navbar;
+
